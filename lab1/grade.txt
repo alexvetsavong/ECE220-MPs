@@ -1,0 +1,4 @@
+Test0: failed with input C0C0
+Test1: failed with input E578
+Test2: failed with input A1FA
+Total: 0
