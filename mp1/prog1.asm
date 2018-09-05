@@ -1,3 +1,7 @@
+; Alex Vetsavong
+; 09/06/2018
+; ECE 220
+; MP1
 ;
 ; The code given to you here implements the histogram calculation that
 ; we developed in class.  In programming lab, we will add code that
@@ -104,6 +108,19 @@ PRINT_HIST
 ; for your implementation, list registers used in this part of the code,
 ; and provide sufficient comments
 
+; This code prints out the histogram for the frequency of characters in a string.
+; It does so by loading the frequency stored in memory starting at x3F00,
+; using the memory address register value to print the bin labels. This is
+; done by masking the first two characters and applying the appropriate
+; offset to the hexadecimal value to print the corresponding ASCII.
+; The value stored in MDR is printed as an ASCII string by circularly left-
+; shifting the bits through the use of a series of ADDs and conditional branches.
+; Every four bits, the character is identified as either a number or letter.
+; The appropriate offset is applied depending on which it is, and then it is
+; output to the screen using the OUT subroutine. This is done for every four
+; bits, until all 27 bins are filled.
+
+
 ;	R0 holds the ASCII character being printed
 ;	R1 is a pointer keeping track of what letter is being looked at.
 ;	R2 is used as a temporary register
@@ -113,68 +130,70 @@ PRINT_HIST
 ;	R6 is a counter to keep track of which bin is being printed
 
 BIN_LABELS
-								 LD R6, NUM_BINS				; load the number of bins into R6 for counting
-							 	 LD R1, HIST_ADDR				; load the starting address into R1
-PRINT_LOOP_TOP 	 AND R0, R0, #0					; clear R0 before pointing to next location
-								 ADD R0, R1, #0					;	place the location into R0 for manipulating
-								 LD R2, ADDRESS_MASK 		; load the mask stored at label into R2
-								 AND R0, R0, R2					;	look only at the least two hexadecimal characters
-								 LD R2, HEX_ASCII_DIFF 	; add necessary offset to print the correct character
-								 ADD R0, R0, R2					; set R0 to the ASCII value of current character
-																				; being printed
-								 OUT
-								 LD R0, SPACE_CHAR			; get R0 ready to print a space.
-								 OUT
+	LD R6, NUM_BINS					; load the number of bins into R6 for counting
+	LD R1, HIST_ADDR				; load the starting address into R1
+	PRINT_LOOP_TOP
+	AND R0, R0, #0					; clear R0 before pointing to next location
+	ADD R0, R1, #0					;	place the location into R0 for manipulating
+	LD R2, ADDRESS_MASK 		; load the mask stored at label into R2
+	AND R0, R0, R2					;	look only at the least two hexadecimal characters
+	LD R2, HEX_ASCII_DIFF 	; add necessary offset to print the correct character
+	ADD R0, R0, R2					; set R0 to the ASCII value of current character
+													; being printed
+	OUT
+	LD R0, SPACE_CHAR				; get R0 ready to print a space.
+	OUT
 
 BIN_DATA
-	AND R2, R2, #0												; clear R2 to hold shifted bits
-	LD R5, FOUR														; initialize counter for bits of data being printed
-	LDR R3, R1, #0												; take the value stored at the location defined by
-																				; R1
-CHECK_LOOP AND R2, R2, #0
-					 ADD R4, R3, #0								; Check first bit
-					 JSR MSB_CHECK
-					 ADD R4, R3, R3								; check next three bits
-					 JSR MSB_CHECK
-					 ADD R4, R4, R4
-					 JSR MSB_CHECK
-					 ADD R4, R4, R4
-					 JSR MSB_CHECK
-					 ADD R0, R2, #0								; load character into R0 from temporary register, R2
-					 JSR CHAR_CHECK
-					 ADD R0, R0, R2								; set correct offset for value being printed.
-					 OUT													; prints current character
-					 JSR CHAR_SHIFT								; moves on to the next character
-					 ADD R5, R5, #-1							; check if there are any more characters to be printed
-					 BRp CHECK_LOOP								; if not, go back to the top of the loop and check again.
+	AND R2, R2, #0								; clear R2 to hold shifted bits
+	LD R5, FOUR										; initialize counter for bits of data being printed
+	LDR R3, R1, #0								; take the value stored at the location defined by
+																; R1
+CHECK_LOOP
+	AND R2, R2, #0
+	ADD R4, R3, #0								; Check first bit
+	JSR MSB_CHECK
+	ADD R4, R3, R3								; check next three bits
+	JSR MSB_CHECK
+	ADD R4, R4, R4
+	JSR MSB_CHECK
+	ADD R4, R4, R4
+	JSR MSB_CHECK
+	ADD R0, R2, #0								; load character into R0 from temporary register, R2
+	JSR CHAR_CHECK
+	ADD R0, R0, R2								; set correct offset for value being printed.
+	OUT														; prints current character
+	JSR CHAR_SHIFT								; moves on to the next character
+	ADD R5, R5, #-1								; check if there are any more characters to be printed
+	BRp CHECK_LOOP								; if not, go back to the top of the loop and check again.
 
 NEXT_BIN
 	LD R0, NEW_LINE
 	OUT
-	ADD R1, R1, #1												; move on to the next bin
-	ADD R6, R6, #-1												; decrement bin counter by 1
-	BRnz DONE															; if there are no more bins to print, then halt
-	BRnzp PRINT_LOOP_TOP									; else, go back to top of printing loop.
+	ADD R1, R1, #1								; move on to the next bin
+	ADD R6, R6, #-1								; decrement bin counter by 1
+	BRnz DONE											; if there are no more bins to print, then halt
+	BRnzp PRINT_LOOP_TOP					; else, go back to top of printing loop.
 
 
 MSB_CHECK
-	BRn MSB_ONE													; if MSB was one, delay bit-shifting R2
+	BRn MSB_ONE										; if MSB was one, bitshift R2 before adding 1.
 	ADD R2, R2, R2
 	RET
-	
-	MSB_ONE ADD R2, R2, R2
+
+	MSB_ONE ADD R2, R2, R2				; this branch prevents excessive shifting
 	ADD R2, R2, #1
 	RET
 
 CHAR_CHECK
 	ADD R2, R0, #-9	; checks if the value is a number or letter
 	BRnz NUMBER_CHAR	; if the character is a number, add correct offset to R0
-	LD R2, HEX_TO_LETTER
+	LD R2, HEX_TO_LETTER	; loads proper offset for letter
 	RET
-	NUMBER_CHAR LD R2, HEX_TO_NUMBER
+	NUMBER_CHAR LD R2, HEX_TO_NUMBER ; loads proper offset for number
 	RET
 
-CHAR_SHIFT  					; looks at the next character being printed
+CHAR_SHIFT  					; looks at the next character being printed by bitshifting four times.
 	ADD R3, R3, R3
 	ADD R3, R3, R3
 	ADD R3, R3, R3
