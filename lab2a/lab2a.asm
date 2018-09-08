@@ -2,15 +2,97 @@
 ; Write code to read in characters and echo them
 ; till a newline character is entered.
 
- 
-SPACE   .FILL x0020
+GET_CHAR                ; Retrieves and checks the current character
+  GETC
+  OUT
+
+  LD R1, SPACE          ; check if the current character is a space.
+  NOT R1, R1
+  ADD R1, R1, #1
+  ADD R1, R0, R1
+  BRz GET_CHAR          ; Do nothing and look for another character again.
+
+  LD R1, NEW_LINE       ; check if the current character is a newline.
+  NOT R1, R1
+  ADD R1, R1, #1
+  ADD R1, R0, R1
+  BRz DONE              ; if new line, go to end.
+
+  LD R1, CHAR_RETURN    ; check if current character is a carriage return.
+  NOT R1, R1
+  ADD R1, R1, #1
+  ADD R1, R0, R1
+  BRz DONE              ; if it is a carriage return, go to end.
+
+  JSR IS_BALANCED       ; check for parentheses in called function
+
+  BRnzp GET_CHAR
+
+DONE
+  JSR IS_BALANCED ; check if the stack is balanced
+  TERMINATE_SUCCESS
+    HALT
+  TERMINATE_ERROR         ; if there is an error, program should halt.
+    ADD R6, R6, #-1       ; set R6 to show unbalanced/error
+    HALT
+
+SPACE           .FILL x0020
 NEW_LINE        .FILL x000A
 CHAR_RETURN     .FILL x000D
+ASCII_DIFF      .FILL x0030
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;if ( push onto stack if ) pop from stack and check if popped value is (
 ;input - R0 holds the input
 ;output - R6 set to -1 if unbalanced. else 1.
+
 IS_BALANCED
+  ST  R7, BAL_SAVE_R7
+  LD  R1, NEG_OPEN
+  ADD R1, R1, R0
+  BRz OPEN_PAR
+
+  LD  R1, NEW_LINE       ; check if the current character is a newline.
+  NOT R1, R1
+  ADD R1, R1, #1
+  ADD R1, R0, R1
+  BRz STACK_CHECK       ; if new line, check for empty stack
+
+  LD  R1, CHAR_RETURN    ; check if current character is a carriage return.
+  NOT R1, R1
+  ADD R1, R1, #1
+  ADD R1, R0, R1
+  BRz STACK_CHECK       ; if carriage return, check for empty stack
+
+  CLOSE_PAR
+    AND R6, R6, #0        ; clear balance indicator
+    ADD R2, R0, #0        ; move closed parenthesis to R2
+    JSR POP               ; pop top of stack to R0
+    ADD R5, R5, #0        ; check for underflow
+    BRp TERMINATE_ERROR   ; if stack is empty, halt program
+    LD  R1, NEG_OPEN       ; load additive inverse of '('
+    ADD R1, R0, R1        ; check if popped value is '('
+    BRz BALANCED          ; if zero. there is a matching '(' for ')'
+
+  OPEN_PAR
+    AND R6, R6, #0
+    JSR PUSH              ; push '(' to stack
+    ADD R5, R5, #0        ; check for overflow
+    BRp TERMINATE_ERROR   ; if overflow, halt program
+    BRnzp BALANCED
+
+  BALANCED
+    ADD R6, R6, #1
+    LD R7, BAL_SAVE_R7
+    RET
+
+  STACK_CHECK
+    AND R6, R6, #0
+    JSR POP
+    ADD R5, R5, #0  ; check for underflow, assuming stack is empty
+    BRp BALANCED ; if stack is empty, string is balanced
+    BRnzp TERMINATE_ERROR ; if stack is not empty, string is unbalanced.
+
+BAL_SAVE_R7 .BLKW #1
 
 NEG_OPEN .FILL xFFD8
 ;IN:R0, OUT:R5 (0-success, 1-fail/overflow)
@@ -48,7 +130,7 @@ PUSH_SaveR4     .BLKW #1        ;
 ;
 POP
         ST R3, POP_SaveR3       ;save R3
-        ST R4, POP_SaveR4       ;save R3
+        ST R4, POP_SaveR4       ;save R4
         AND R5, R5, #0          ;clear R5
         LD R3, STACK_START      ;
         LD R4, STACK_TOP        ;
@@ -75,4 +157,3 @@ STACK_START     .FILL x4000     ;
 STACK_TOP       .FILL x4000     ;
 
 .END
-
