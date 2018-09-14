@@ -10,7 +10,7 @@
 ;   Register R5 - [0 - F]{4}, evaluation of postfix expression
 
 .ORIG x3000
-	
+
 MAIN
 
 ; INSERT CODE HERE!
@@ -32,7 +32,7 @@ PRINT_HEX
 ;   Description: handles input from console
 ;   Inputs: Console - input
 ;   Outputs: Console - evaluation of expression or error
-;	     R5 - evalution of expression  
+;	     R5 - evaluation of expression
 EVALUATE
 
 ; INSERT CODE HERE!
@@ -43,28 +43,58 @@ EVALUATE
 ;   Inputs: R3 - addend
 ;	    R4 - addend
 ;   Outputs: R0 - sum
-PLUS	
+PLUS
 
 ; INSERT CODE HERE!
+ST R7 PLUS_SAVER7
+JSR POP
+ADD R5, R5, #0
+BRp RESTORE_1
+ADD R3, R0, #0
+JSR POP
+ADD R5, R5, #0
+BRp RESTORE_2
+ADD R4, R0, #0
+ADD R0, R3, R4
+JSR PUSH
+LD R7 PLUS_SAVER7
+RET
 
-	
+PLUS_SAVER7 .BLKW #1
+
 ; MIN
 ;   Description: subtracts two numbers (R0 = R3 - R4)
 ;   Inputs: R3 - minuend
 ;	    R4 - subtrahend
 ;   Outputs: R0 - difference
-MIN	
+MIN
 
 ; INSERT CODE HERE!
+ST R7, MIN_SAVER7
+JSR POP
+ADD R5, R5, #0
+BRp RESTORE_1
+ADD R4, R0, #0
+NOT R4, R4
+ADD R4, R4, #1
+JSR POP
+ADD R5, R5, #0
+BRp RESTORE_2
+ADD R3, R0, #0
+ADD R0, R3, R4
+JSR PUSH
+LD R7, MIN_SAVER7
+RET
 
-	
+MIN_SAVER7 .BLKW #1
+
 ; MUL
 ;   Description: multiplies two numbers (R0 = R3 * R4)
 ;   Inputs: R3 - factor
 ;	    R4 - factor
 ;   Outputs: R0 - product
-MUL	
-	
+MUL
+
 ; INSERT CODE HERE!
 
 
@@ -73,18 +103,18 @@ MUL
 ;   Inputs: R3 - numerator
 ;	    R4 - denominator
 ;   Outputs: R0 - quotient
-DIV	
+DIV
 
 ; INSERT CODE HERE!
-	
-	
+
+
 ; PUSH
 ;   Description: Pushes a charcter unto the stack
 ;   Inputs: R0 - character to push unto the stack
 ;   Outputs: R5 - 0 (success) or 1 (failure/overflow)
 ;   Registers: R3 - stores STACK_END
 ;	       R4 - stores STACK_TOP
-PUSH	
+PUSH
 	ST R3, PUSH_SaveR3	;save R3
 	ST R4, PUSH_SaveR4	;save R4
 	AND R5, R5, #0		;
@@ -94,7 +124,7 @@ PUSH
 	NOT R3, R3		;
 	ADD R3, R3, #1		;
 	ADD R3, R3, R4		;
-	BRz OVERFLOW		;stack is full
+	BRz OVERFLOW			;stack is full
 	STR R0, R4, #0		;no overflow, store value in the stack
 	ADD R4, R4, #-1		;move top of the stack
 	ST R4, STACK_TOP	;store top of stack pointer
@@ -113,13 +143,13 @@ PUSH_SaveR4	.BLKW #1	;
 
 ; POP
 ;   Description: Pops a character off the stack
-;   Inputs: 
+;   Inputs:
 ;   Outputs: R0 - character popped off the stack
 ;	     R5 - 0 (success) or 1 (failure/underflow)
 ;   Registers: R3 - stores STACK_END
 ;	       R4 - stores STACK_TOP
 
-POP	
+POP
 	ST R3, POP_SaveR3	;save R3
 	ST R4, POP_SaveR4	;save R3
 	AND R5, R5, #0		;clear R5
