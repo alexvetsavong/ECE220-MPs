@@ -190,6 +190,7 @@ EVALUATE
 EVALUATE_SAVER7 .BLKW #1
 
   ; values needed for program to evaluate inputs
+
   ASCII_NUM   .FILL x0030
 
   ASCII_STAR  .FILL x002A
@@ -225,6 +226,7 @@ PLUS
   JSR PUSH                             ; push result onto stack
   LD R7, PLUS_SAVER7
   RET
+
 PLUS_SAVER7 .BLKW #1
 
 ; MIN
@@ -258,6 +260,7 @@ MIN
   JSR PUSH
   LD R7, MIN_SAVER7
   RET
+
 MIN_SAVER7 .BLKW #1
 
 ; MUL
@@ -269,7 +272,6 @@ MUL
 
   ; INSERT CODE HERE!
 
-
   ST R7, MUL_SAVER7                    ; save location of where we were before
   ADD R3, R1, R2                       ; compare this operation to input operation
   BRz PERFORM_MUL                      ; if not right operation, go back to
@@ -277,27 +279,74 @@ MUL
 
   PERFORM_MUL
   JSR POP
+  ADD R5, R5, #0
+  BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
   ADD R4, R0, #0
-  ADD R5, R5, #0
-  BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
+  JSR CHECK_R4_MUL
+
   JSR POP
-  ADD R3, R0, #0
   ADD R5, R5, #0
   BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
+  ADD R3, R0, #0
+  JSR CHECK_R3_MUL
 
-
+  AND R0, R0, #0
   MUL_LOOP_TOP
-    AND R0, R0, #0
-    ADD R0, R3, #0
+    ADD R0, R0, R3
     ADD R4, R4, #-1
-    BRnz MUL_DONE
+    BRnz MUL_FIX_SIGN
     BRnzp MUL_LOOP_TOP
+
+  MUL_FIX_SIGN
+    ADD R6, R6, #0
+    BRp CHECK_R0_NEG
+    BRz CHECK_R0_POS
+
+    NEGATE_R0_MUL
+    NOT R0, R0
+    ADD R0, R0, #1
+    BRnzp MUL_DONE
+
+    CHECK_R0_NEG
+    ADD R0, R0, #0
+    BRn MUL_DONE
+    BRzp NEGATE_R0_MUL
+
+    CHECK_R0_POS
+    ADD R0, R0, #0
+    BRp MUL_DONE
+    BRnz NEGATE_R0_MUL
 
   MUL_DONE
     JSR PUSH
     LD R7, MUL_SAVER7
     RET
+
 MUL_SAVER7 .BLKW #1
+
+CHECK_R4_MUL
+  BRzp CHECK_R4_MUL_DONE
+  NOT R4, R4
+  ADD R4, R4, #1
+  LD R6, EXPECTED_NEG
+
+  CHECK_R4_MUL_DONE
+    RET
+
+CHECK_R3_MUL
+  BRzp CHECK_R3_MUL_DONE
+  ADD R6, R6, #0
+  BRz CHECK_R3_MUL_NEGATIVE_ANS
+
+  CHECK_R3_MUL_POSITIVE_ANS
+    LD R6, EXPECTED_POS
+    BRnzp CHECK_R3_MUL_DONE
+
+  CHECK_R3_MUL_NEGATIVE_ANS
+    LD R6, EXPECTED_NEG
+
+  CHECK_R3_MUL_DONE
+    RET
 
 ; DIV
 ;   Description: divides two numbers (R0 = R3 / R4)
@@ -334,7 +383,10 @@ DIV
   DIV_DONE
     LD R7, DIV_SAVER7
     RET
+
 DIV_SAVER7 .BLKW #1
+EXPECTED_POS .FILL #0
+EXPECTED_NEG .FILL #1
 
 ; PUSH
 ;   Description: Pushes a charcter unto the stack
@@ -363,7 +415,6 @@ DONE_PUSH
 	LD R3, PUSH_SaveR3	;
 	LD R4, PUSH_SaveR4	;
 	RET
-
 
 PUSH_SaveR3	.BLKW #1	;
 PUSH_SaveR4	.BLKW #1	;
