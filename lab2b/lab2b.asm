@@ -1,7 +1,6 @@
 ;number to print in decimal is in R3.
 ;it will be positive.
 .ORIG x3000
-LD R3, DIVIDEND
 
 LOOP_TOP
 JSR DIV
@@ -9,19 +8,20 @@ ADD R3, R0, #0
 ADD R0, R1, #0
 JSR PUSH
 ADD R3, R3, #0
-BRz LOOP_TOP
+BRz PRINT_LOOP
+BRnzp LOOP_TOP
 
 PRINT_LOOP
 JSR POP
 ADD R5, R5, #0
 BRp PRINT_DONE
-ADD R0, R0, ASCII_0
+LD R1, ASCII_0
+ADD R0, R0, R1
+OUT
 BRnzp PRINT_LOOP
 
 PRINT_DONE
 HALT
-
-DIVIDEND .FILL #120
 
 ASCII_0 .FILL x30
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -30,7 +30,6 @@ ASCII_0 .FILL x30
 DIV
 	ST R7, DIV_SAVER7
 	LD R4, DIVISOR
-	LD R7, DIV_SAVER7
 
 	AND R0, R0, #0
 	NOT R4, R4
@@ -40,7 +39,8 @@ DIV
 	ADD R3, R3, R4
 	ADD R0, R0, #1
 	ADD R3, R3, #0
-	BRn DIV_DONE
+ 	BRn DIV_DONE
+	BRnzp DIV_LOOP
 
 	DIV_DONE
 	NOT R4, R4
@@ -49,6 +49,7 @@ DIV
 	ADD R0, R0, #-1
 	ADD R1, R3, #0
 
+	LD R7, DIV_SAVER7
 	RET
 
 DIV_SAVER7 .BLKW #1
