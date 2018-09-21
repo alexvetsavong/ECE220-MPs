@@ -1,32 +1,60 @@
+; Name: Alex N. Vetsavong
+; NetID: avetsa2
+; Date: 9/20/2018
+;
 ; mp2.asm
-; Implement a stack calculator that can do the following operations:
-; ADD, SUBTRACT, MULTIPLY, DIVIDE
-
-; Inputs:
-;   Console - postfix expression
-
-; Outputs:
-;   Console - [0 - F]{4}, evaluation of postfix expression
-;   Register R5 - [0 - F]{4}, evaluation of postfix expression
+;
+; This project uses stacks in order to perform four arithmetic operations:
+; addition, multiplication, subtraction, and division. Given an input from keyboard,
+; any operand would be pushed to the stack and any operator defined by the
+; ASCII characters corresponding to '+', '-', '*', '/', and '=' would either
+; pop two operands off the stack and perform the appropriate operation before
+; pushing the result onto the stack, or the '=' would pop the result of the
+; entire expression and print it to the console.
+;
+; This project works by defining each operation as a subroutine which is called
+; by the MAIN program through an evaluation subroutine that parses each ASCII input.
+; The calculator assumes that the only valid inputs are single-digit integers (0-9)
+; and the operators.
+;
+; _______________________________REGISTER TABLE_________________________________
+; Register___|_____Purpose______________________________________________________
+; R0         | Contains outputs of subroutine operations and ASCII character
+;            | being evaluated from console
+;            |
+; R1         | Used as a comparative register for checking current ASCII
+;            | character in R0
+;            |
+; R2         | Used as a temporary register for looking at ASCII value to
+;            | prevent tampering with R0
+;            |
+; R3         | Temporary register in main program and EVALUATE subroutine;
+;            | operand for arithmetic subroutines; input for PRINT_HEX subroutine.
+;            |
+; R4         | Other operand for arithmetic subroutines
+;            |
+; R5         | Holds the evaluated value of the expression. Also stored in R3
+;            | during PRINT_HEX for printing to console.
+;            |
+; R6         | Used to keep track of the expected signs of evaluations of
+;            | multiply and divide operations.
 
 .ORIG x3000
 
 MAIN
+  GETC                     ; get input from keyboard
+  OUT                      ; echo to console
+  JSR EVALUATE             ; evaluate the input character
+  BRnzp MAIN               ; keep repeating until '=' is entered
 
-; INSERT CODE HERE!
-GETC
-OUT
-JSR EVALUATE
-BRnzp MAIN
+  INVALID_EXPRESSION       ; outputs error message if underflow occurs
+    LEA R0, errorMessage   ; or expression is invalid
+    PUTS
+    HALT
 
-INVALID_EXPRESSION
-  LEA R0, errorMessage
-  PUTS
-  HALT
-
-DONE
-  JSR PRINT_HEX
-  HALT
+  DONE
+    JSR PRINT_HEX          ; echo evaluated value to console
+    HALT                   ; exit program
 
 errorMessage .STRINGZ " Invalid Expression"
 
@@ -36,33 +64,35 @@ errorMessage .STRINGZ " Invalid Expression"
 ;   Outputs: Value printed to the console
 PRINT_HEX
 
-  ; INSERT CODE HERE!
   ST R7, PRINT_SAVER7
-  JSR POP                           ; pop result off stack
+  JSR POP                       ; pop result off stack
   ADD R5, R5, #0
-  BRp INVALID_EXPRESSION            ; check for underflow
-  ST R0, SAVE_RESULT                ; save result in memory
-  ADD R3, R0, #0                    ; move result into R3 for printing
+  BRp INVALID_EXPRESSION        ; check for underflow
+  ST R0, SAVE_RESULT            ; save result in memory
+  ADD R3, R0, #0                ; move result into R3 for printing
 
-  JSR POP                           ; pop result off stack
+  JSR POP                       ; pop item off stack
   ADD R5, R5, #0
-  BRz INVALID_EXPRESSION            ; check to see if stack is empty
-                                    ; if not empty after last pop, invalid expression
+  BRz INVALID_EXPRESSION        ; check to see if stack is empty
+                                ; if not empty after last pop, invalid expression
 
   AND R0, R0, #0
   AND R1, R1, #0
   ADD R1, R1, #4
 
+  LD R0, ASCII_SPACE            ; Load ASCII_SPACE into R0
+  OUT                           ; print space char for readability.
+
   printCharacter
-      LD R6, INPUT_MASK             ; This allows us to look at only the Most-Significant hex value.
-      AND R2, R3, R6                ; Takes MSB of Hex-value and puts it in R0
-      JSR CONVERT                   ; Jumps to function that converts MSB to equivalent ASCII value
-      OUT                           ; Print character
+      LD R6, INPUT_MASK         ; This allows us to look at only the Most-Significant hex value.
+      AND R2, R3, R6            ; Takes MSB of Hex-value and puts it in R0
+      JSR CONVERT               ; Jumps to function that converts MSB to equivalent ASCII value
+      OUT                       ; Print character
 
-      JSR VALUE_SHIFT_LEFT          ; Shift value in R3 to look at next group.
+      JSR VALUE_SHIFT_LEFT      ; Shift value in R3 to look at next group.
 
-      ADD R1, R1, #-1               ; Decrement byte counter
-      BRp printCharacter            ; If bytes being printed remain, repeat function until done.
+      ADD R1, R1, #-1           ; Decrement byte counter
+      BRp printCharacter        ; If bytes being printed remain, repeat function until done.
       LD R0, ASCII_SPACE
       OUT
 
@@ -70,14 +100,14 @@ PRINT_HEX
       LD R5, SAVE_RESULT
       RET
 
-  VALUE_SHIFT_LEFT                ; Will shift the entire value stored in R3 by a whole 4 bits
+  VALUE_SHIFT_LEFT              ; Will shift the entire value stored in R3 by a whole 4 bits
       ADD R3, R3, R3
       ADD R3, R3, R3
       ADD R3, R3, R3
       ADD R3, R3, R3
       RET
 
-  CONVERT                     ; The operation that converts the hex value to a corresponding ASCII character
+  CONVERT                       ; The operation that converts the hex value to a corresponding ASCII character
       AND R5, R5, #0
       AND R4, R4, #0
       ADD R4, R4, #4
@@ -134,7 +164,7 @@ FIFTY_FIVE    .FILL #55
 ;	     R5 - evaluation of expression
 EVALUATE
 
-  ; INSERT CODE HERE!
+
   ST R7, EVALUATE_SAVER7
 
   ADD R2, R0, #0                ; put ASCII value into R2 for checking
@@ -148,7 +178,7 @@ EVALUATE
   LD R1, ASCII_SPACE            ; load ASCII value of '(space)' into R1
   NOT R1, R1
   ADD R1, R1, #1
-  ADD R3, R1, R2                ; compare to input value
+  ADD R3, R1, R2                ; compare to input valueR5
   BRz MAIN                      ; if space, go back to start; get more inputs.
 
   LD R1, ASCII_NUM              ; load starting hexadecimal for ASCII 0
@@ -162,7 +192,7 @@ EVALUATE
   JSR PUSH                      ; push number onto stack
   BRnzp EVALUATE_DONE           ; return to main program for more inputs
 
-  CHECK_OPERATION               ; perform operation corresponding to the input
+  CHECK_OPERATION               ; call operation subroutine corresponding to input
     LD R1, ASCII_STAR
     NOT R1, R1
     ADD R1, R1, #1
@@ -191,14 +221,13 @@ EVALUATE_SAVER7 .BLKW #1
 
   ; values needed for program to evaluate inputs
 
-  ASCII_NUM   .FILL x0030
-
-  ASCII_STAR  .FILL x002A
-  ASCII_PLUS  .FILL x002B
-  ASCII_MIN   .FILL x002D
-  ASCII_DIV   .FILL x002F
-  ASCII_EQUAL .FILL x003D
-  ASCII_SPACE .FILL x0020
+ASCII_NUM   .FILL x0030
+ASCII_STAR  .FILL x002A
+ASCII_PLUS  .FILL x002B
+ASCII_MIN   .FILL x002D
+ASCII_DIV   .FILL x002F
+ASCII_EQUAL .FILL x003D
+ASCII_SPACE .FILL x0020
 
 ; PLUS
 ;   Description: adds two numbers (R0 = R3 + R4)
@@ -207,7 +236,6 @@ EVALUATE_SAVER7 .BLKW #1
 ;   Outputs: R0 - sum
 PLUS
 
-  ; INSERT CODE HERE!
   ST R7, PLUS_SAVER7                   ; save location of where we were before
   ADD R3, R1, R2                       ; compare this operation to input operation
   BRz PERFORM_PLUS                     ; if not right operation, go back to
@@ -236,7 +264,7 @@ PLUS_SAVER7 .BLKW #1
 ;   Outputs: R0 - difference
 MIN
 
-  ; INSERT CODE HERE!
+
 
   ST R7, MIN_SAVER7                    ; save location of where we were before
   ADD R3, R1, R2                       ; compare this operation to input operation
@@ -270,53 +298,48 @@ MIN_SAVER7 .BLKW #1
 ;   Outputs: R0 - product
 MUL
 
-  ; INSERT CODE HERE!
-
-  ST R7, MUL_SAVER7                    ; save location of where we were before
-  ADD R3, R1, R2                       ; compare this operation to input operation
-  BRz PERFORM_MUL                      ; if not right operation, go back to
-  RET                                  ; previous instruction
+  ST R7, MUL_SAVER7                  ; save location of where we were before
+  ADD R3, R1, R2                     ; compare this operation to input operation
+  BRz PERFORM_MUL                    ; if not right operation, go back to
+  RET                                ; previous instruction
 
   PERFORM_MUL
-  JSR POP
-  ADD R5, R5, #0
-  BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
-  ADD R4, R0, #0
-  JSR CHECK_R4_MUL
+    JSR POP
+    ADD R5, R5, #0
+    BRp INVALID_EXPRESSION           ; if underflow error, invalid expression
+    ADD R4, R0, #0
+    JSR CHECK_R4_MUL
+    JSR POP
+    ADD R5, R5, #0
+    BRp INVALID_EXPRESSION           ; if underflow error, invalid expression
+    ADD R3, R0, #0
+    JSR CHECK_R3_MUL
 
-  JSR POP
-  ADD R5, R5, #0
-  BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
-  ADD R3, R0, #0
-  JSR CHECK_R3_MUL
+    AND R0, R0, #0
+    MUL_LOOP_TOP
+      ADD R0, R0, R3
+      ADD R4, R4, #-1
+      BRnz MUL_FIX_SIGN
+      BRnzp MUL_LOOP_TOP
+    MUL_FIX_SIGN                     ; Compares sign of R0 to the expected sign
+    ADD R6, R6, #0                   ; Stored in R6
+    BRp MUL_CHECK_R0_NEG
+    BRz MUL_CHECK_R0_POS
 
-  AND R0, R0, #0
-  MUL_LOOP_TOP
-    ADD R0, R0, R3
-    ADD R4, R4, #-1
-    BRnz MUL_FIX_SIGN
-    BRnzp MUL_LOOP_TOP
-
-  MUL_FIX_SIGN
-    ADD R6, R6, #0
-    BRp CHECK_R0_NEG
-    BRz CHECK_R0_POS
-
-    NEGATE_R0_MUL
-    NOT R0, R0
+    NEGATE_R0_MUL                    ; if the sign in R0 is not correct
+    NOT R0, R0                       ; take it's 2's complement
     ADD R0, R0, #1
     BRnzp MUL_DONE
 
-    CHECK_R0_NEG
+    MUL_CHECK_R0_NEG                 ; necessary to check twice to avoid uncovered cases
     ADD R0, R0, #0
     BRn MUL_DONE
     BRzp NEGATE_R0_MUL
 
-    CHECK_R0_POS
+    MUL_CHECK_R0_POS
     ADD R0, R0, #0
     BRp MUL_DONE
     BRnz NEGATE_R0_MUL
-
   MUL_DONE
     JSR PUSH
     LD R7, MUL_SAVER7
@@ -325,26 +348,22 @@ MUL
 MUL_SAVER7 .BLKW #1
 
 CHECK_R4_MUL
-  BRzp CHECK_R4_MUL_DONE
-  NOT R4, R4
-  ADD R4, R4, #1
+  BRzp CHECK_R4_MUL_DONE                ; if this first operand is a negative
+  NOT R4, R4                            ; find 2's complement and set R6 to 1
+  ADD R4, R4, #1                        ; to show expected answer is negative
   LD R6, EXPECTED_NEG
-
   CHECK_R4_MUL_DONE
     RET
 
 CHECK_R3_MUL
-  BRzp CHECK_R3_MUL_DONE
-  ADD R6, R6, #0
-  BRz CHECK_R3_MUL_NEGATIVE_ANS
-
-  CHECK_R3_MUL_POSITIVE_ANS
-    LD R6, EXPECTED_POS
+  BRzp CHECK_R3_MUL_DONE                ; if second operand is a negative,
+  ADD R6, R6, #0                        ; and expected answer is currently positive
+  BRz CHECK_R3_MUL_NEGATIVE_ANS         ; set expected answer to be negative
+  CHECK_R3_MUL_POSITIVE_ANS             ; else if current expected answer is negative
+    LD R6, EXPECTED_POS                 ; set expected answer to be positive
     BRnzp CHECK_R3_MUL_DONE
-
   CHECK_R3_MUL_NEGATIVE_ANS
     LD R6, EXPECTED_NEG
-
   CHECK_R3_MUL_DONE
     RET
 
@@ -355,14 +374,13 @@ CHECK_R3_MUL
 ;   Outputs: R0 - quotient
 DIV
 
-  ; INSERT CODE HERE!
-
   ST R7, DIV_SAVER7                    ; save location of where we were before
   ADD R3, R1, R2                       ; compare this operation to input operation
   BRz PERFORM_DIV                      ; if not right operation, go back to
   RET                                  ; previous instruction
 
   PERFORM_DIV
+  JSR POP
   ADD R4, R0, #0
   ADD R5, R5, #0
   BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
@@ -371,22 +389,56 @@ DIV
   ADD R5, R5, #0
   BRp INVALID_EXPRESSION               ; if underflow error, invalid expression
 
-  NOT R4, R4
-  ADD R4, R4, #1
+  AND R6, R6, #0                       ; make sure R6 initializes as zero
+  AND R0, R0, #0                       ; initialize quotient accumulator
 
-  DIV_LOOP_TOP
-    ADD R0, R0, #1
-    ADD R3, R4, #0
-    BRnz DIV_DONE
+  DIV_CHECK_R4
+    ADD R4, R4, #0                     ; see if R4 is negative
+    BRn DIV_R4_NEGATIVE                ; if R4 is negative, currently expect ans to be negative
+    NOT R4, R4                         ; if R4 is not negative, negate it
+    ADD R4, R4, #1
+    BRnzp DIV_CHECK_R3
+
+    DIV_R4_NEGATIVE
+      LD R6, EXPECTED_NEG
+
+  DIV_CHECK_R3                         ; check if R3 is a negative number
+    ADD R3, R3, #0
+    BRzp DIV_LOOP_TOP                  ; if R3 is positive, skip finding inverse
+
+    NOT R3, R3
+    ADD R3, R3, #1
+
+    ADD R6, R6, #0                     ; if R3 is negative, and current expected quotient is positive
+                                       ; change expected quotient to negative
+
+    BRz EXPECTED_NEG_QUOTIENT          ; if R3 is negative, and current expected quotient is negative
+    LD R6, EXPECTED_POS                ; change expected quotient to positive
+
     BRnzp DIV_LOOP_TOP
 
+    EXPECTED_NEG_QUOTIENT
+    LD R6, EXPECTED_NEG
+
+  DIV_LOOP_TOP                         ; check quotient through repeated subtraction
+    ADD R0, R0, #1
+    ADD R3, R3, R4
+    BRn DIV_CHECK_SIGN
+    BRnzp DIV_LOOP_TOP                 ; if not done, keep subtracting until done
+
+  DIV_CHECK_SIGN                       ; Check for the final sign of the quotient
+    ADD R0, R0, #-1
+    ADD R6, R6, #0
+    BRz DIV_DONE                       ; if quotient is expected to be positive,
+    NOT R0, R0                         ; skip negating R0
+    ADD R0, R0, #1
+
   DIV_DONE
+    JSR PUSH
     LD R7, DIV_SAVER7
     RET
 
-DIV_SAVER7 .BLKW #1
-EXPECTED_POS .FILL #0
-EXPECTED_NEG .FILL #1
+  DIV_SAVER7 .BLKW #1
 
 ; PUSH
 ;   Description: Pushes a charcter unto the stack
@@ -449,12 +501,13 @@ DONE_POP
 	LD R4, POP_SaveR4	;
 	RET
 
-
 POP_SaveR3	.BLKW #1	;
 POP_SaveR4	.BLKW #1	;
 STACK_END	.FILL x3FF0	;
 STACK_START	.FILL x4000	;
 STACK_TOP	.FILL x4000	;
 
+EXPECTED_POS .FILL #0
+EXPECTED_NEG .FILL #1
 
 .END
