@@ -6,7 +6,8 @@
 * This mp3 implements a factorial function which is used to
 * calculate the coefficient of a row in Pascal's triangle through
 * an iterative construct which calculates each coefficient in the
-* row. This works for each row index entered, and prints out a single row to console.
+* row. This works for each row index entered up to the 12th row index,
+* and prints out a single row to console.
 *
 */
 
