@@ -3,41 +3,36 @@
 * NetID:      avetsa2
 * Assignment: mp3.c
 *
-* This mp3 implements a factorial function which is used to
-* calculate the coefficient of a row in Pascal's triangle through
-* an iterative construct which calculates each coefficient in the
-* row. This works for each row index entered up to the 12th row index,
-* and prints out a single row to console.
+* Iterative construct that performs the
+* required calculations for each element in a given row.
+* The loop will iterate through each row element and print it
+* to screen until the end of the row has been reached, and the
+* program is terminated. The program can handle row indexes up
+* to the 40th index given that the result is stored as an
+* unsigned long integer.
 *
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-int i, j, result, factorial(int parameter);
 int main()
 {
   int row;
-  unsigned long coeff;
+
+  float i;                        /* must be float value or else calculations*/
+                                  /* will not be performed                   */
+  unsigned long result;
   printf("Enter a row index: ");
   scanf("%d",&row);
   printf("\n");
-  // Write your code here
-  for (j=0;j<=row;j++){
-    coeff = factorial(row)/(factorial(j)*factorial(row-j));
-    printf("%lu ", coeff);
-    }
-
+  /*Written code below*/                                                                        
+  result = 1;
+  printf("%lu ", result);
+  for (i=1; i <= row; i++){
+    result *= ((row+1-i)/i);      /* given formula in the wikipage for the */
+    printf("%lu ", result);       /* coefficient in any given row position.*/
+  }                               /* It will print out a value after each  */
+                                  /* calculation that is performed.        */
   printf("\n");
   return 0;
-}
-
-int factorial (int parameter){
-  result = 1;                               /* initializes the factorial as 1*/
-  if (parameter > 0){
-    for (i=0; i < parameter; i++){          /* if the input is not 0, then use */
-      result *= (parameter-i);              /* to find the factorial.*/
-    }
-  }
-  else result = 1;                          /* if input is zero, return 1*/
-  return result;
 }
