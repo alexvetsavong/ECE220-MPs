@@ -19,18 +19,18 @@ int main()
 {
   int row;
 
-  float i;                        /* must be float value or else calculations*/
+  long double i;                       /* must be float value or else calculations*/
                                   /* will not be performed                   */
-  unsigned long result;
+  unsigned long long result;
   printf("Enter a row index: ");
   scanf("%d",&row);
   printf("\n");
-  /*Written code below*/                                                                        
+  /*Written code below*/
   result = 1;
-  printf("%lu ", result);
+  printf("%llu ", result);
   for (i=1; i <= row; i++){
     result *= ((row+1-i)/i);      /* given formula in the wikipage for the */
-    printf("%lu ", result);       /* coefficient in any given row position.*/
+    printf("%llu ", result);      /* coefficient in any given row position.*/
   }                               /* It will print out a value after each  */
                                   /* calculation that is performed.        */
   printf("\n");
