@@ -124,14 +124,11 @@ void start_game (int* one, int* two, int* three, int* four)
  */
 
 int make_guess (const char guess_str[], int* one, int* two, int* three, int* four){
-  int w, x, y, z, p_match, m_match, track_1, track_2, track_3, track_4;
+  int w, x, y, z, p_match = 0, m_match = 0,
+    track_g1 = 0, track_g2 = 0, track_g3 = 0, track_g4 = 0,
+    track_s1 = 0, track_s2 = 0, track_s3 = 0, track_s4 = 0;
   char post[2];
-  track_1 = 0;
-  track_2 = 0;
-  track_3 = 0;
-  track_4 = 0;
-  p_match = 0;
-  m_match = 0;
+
 //  One thing you will need to read four integers from the string guess_str, using a process
 //  similar to set_seed
 //  The statement, given char post[2]; and four integers w,x,y,z,
@@ -150,92 +147,110 @@ int make_guess (const char guess_str[], int* one, int* two, int* three, int* fou
 	}
 //  Otherwise, it is invalid.
 //  Feel free to use this sscanf statement, delete these comments, and modify the return statement as needed
-    *one = w;
-    *two = x;
-    *three = y;
-    *four = z;
+  *one = w;
+  *two = x;
+  *three = y;
+  *four = z;
 
-    if (solution1 == w){
-      p_match++;
-      track_1 = 1;
+//  Check for perfect matches and pair them with solution number
+  if (w == solution1){
+    p_match++;
+    track_s1 = 1;
+    track_g1 = 1;
+  }
+
+  if (x == solution2){
+    p_match++;
+    track_s2 = 1;
+    track_g2 = 1;
+  }
+
+  if (y == solution3){
+    p_match++;
+    track_s3 = 1;
+    track_g3 = 1;
+  }
+
+  if (z == solution4){
+    p_match++;
+    track_s4 = 1;
+    track_g4 = 1;
+  }
+
+// Check for mismatched guesses and solutions
+  if (!track_g1){
+    if (!track_s2 && w == solution2){
+      m_match++;
+      track_g1 = 1;
+      track_s2 = 1;
     }
-
-    if (solution2 == x){
-      p_match++;
-      track_2 = 1;
+    if (!track_g1 && !track_s3 && w == solution3){
+      m_match++;
+      track_g1 = 1;
+      track_s3 = 1;
     }
-
-    if (solution3 == y){
-      p_match++;
-      track_3 = 1;
+    if (!track_g1 && !track_s4 && w == solution4){
+      m_match++;
+      track_g1 = 1;
+      track_s4 = 1;
     }
+  }
 
-    if (solution4 == z){
-      p_match++;
-      track_4 = 1;
+  if (!track_g2){
+    if (!track_s1 && x == solution1){
+      m_match++;
+      track_g2 = 1;
+      track_s1 = 1;
     }
-
-    if (!track_1){
-      if (solution1 == x){
-        m_match++;
-        track_2 = 1;
-      }
-      if (solution1 == y){
-        m_match++;
-        track_3 = 1;
-      }
-      if (solution1 == z){
-        m_match++;
-        track_4 = 1;
-      }
+    if (!track_g2 && !track_s3 && x == solution3){
+      m_match++;
+      track_g2 = 1;
+      track_s3 = 1;
     }
-
-    if (!track_2){
-      if (solution2 == w){
-        m_match++;
-        track_1 = 1;
-      }
-      if (solution2 == y){
-        m_match++;
-        track_3 = 1;
-      }
-      if (solution2 == z){
-        m_match++;
-        track_4 = 1;
-      }
+    if (!track_g2 && !track_s4 && x == solution4){
+      m_match++;
+      track_g2 = 1;
+      track_s4 = 1;
     }
+  }
 
-    if (!track_3){
-      if (solution3 == w){
-        m_match++;
-        track_1 = 1;
-      }
-      if (solution3 == x){
-        m_match++;
-        track_2 = 1;
-      }
-      if (solution3 == z){
-        m_match++;
-        track_4 = 1;
-      }
+  if (!track_g3){
+    if (!track_s1 && y == solution1){
+      m_match++;
+      track_g3 = 1;
+      track_s1 = 1;
     }
-
-    if (!track_4){
-      if (solution4 == w){
-        m_match++;
-        track_1 = 1;
-      }
-      if (solution4 == x){
-        m_match++;
-        track_2 = 1;
-      }
-      if (solution4 == y){
-        m_match++;
-        track_3 = 1;
-      }
+    if (!track_g3 && !track_s2 && y == solution2){
+      m_match++;
+      track_g3 = 1;
+      track_s2 = 1;
     }
+    if (!track_g3 && !track_s4 && y == solution4){
+      m_match++;
+      track_g3 = 1;
+      track_s4 = 1;
+    }
+  }
 
-    printf("With guess %d, you got %d perfect matches and %d misplaced matches.\n", guess_number, p_match, m_match);
-    guess_number++;
-    return 1;
+  if (!track_g4){
+    if(!track_s1 && z == solution1){
+      m_match++;
+      track_g4 = 1;
+      track_s1 = 1;
+    }
+    if (!track_g4 && !track_s2 && z == solution2){
+      m_match++;
+      track_g4 = 1;
+      track_s2 = 1;
+    }
+    if (!track_g4 && !track_s3 && z == solution3){
+      m_match++;
+      track_g4 = 1;
+      track_s3 = 1;
+    }
+  }
+
+  printf("With guess %d, you got %d perfect matches and %d misplaced matches.\n", guess_number, p_match, m_match);
+  guess_number++;
+  return 1;
 }
