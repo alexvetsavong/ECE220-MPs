@@ -12,18 +12,21 @@
 #include <stdlib.h>
 #include "dice.h"
 
-void srand(unsigned int seed){}
-
 int main(){
-	unsigned int seed, one, two, three;
+	unsigned int seed; 
+	int one, two, three;
+	one = 1;
+	two = 2;
+	three = 3;
 	printf("Enter a seed: \n");
 	scanf("%u", &seed);
-	srand((unsigned) seed);
+	srand(seed);
 	roll_three(&one, &two, &three);
-	printf("%u %u %u ", one, two, three);
-	if (one == two == three){
+	printf("%d %d %d ", one, two, three);
+	if ((one == two) && (two == three)){
 		printf("Triple!\n");
 	}
-	else if (one == two || one == three || two == three) printf("Double!\n");
+	else if ((one == two) || (one == three) || (two == three)) 
+		printf("Double!\n");
 	return 0;
 }	
