@@ -54,7 +54,7 @@ int set_seed (const char seed_str[])
 //    When the user has typed in only an integer, only 1 item should be read sucessfully.
 //    Check that the return value is 1 to ensure the user enters only an integer.
     if (sscanf(seed_str, "%d%1s", &seed, post) != 1){
-      printf("set_seed: invalid ssed\n");
+      printf("set_seed: invalid seed\n");
       return 0;
 }
 //    Feel free to uncomment these statements, modify them, or delete these comments as necessary.
@@ -83,13 +83,13 @@ void start_game (int* one, int* two, int* three, int* four)
 {
 // your code here
 	*one = rand() % 6;
-  *one = *one + 1;
+  *one += 1;
 	*two = rand() % 6;
-  *two = *two + 1;
+  *two += 1;
 	*three = rand() % 6;
-  *three = *three + 1;
+  *three += 1;
 	*four = rand() % 6;
-  *four = *four + 1;
+  *four += 1;
 
   guess_number = 1;
 
