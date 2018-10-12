@@ -1,30 +1,33 @@
-
-/*
- * The functions that you must write are defined in the header file.
- * Blank function prototypes with explanatory headers are provided
- * in this file to help you get started.
+/* Name: Alex N. Vetsavong
+ * Date: 10/11/2018
+ * MP5: Codebreaker
+ *
+ * ECE220 FA2018
+ *
+ * These functions are used to implement the codebreaker game found in main.c.
+ * Set_seed and start_game make use of C's pseudorandom number generator
+ * by allowing the user to enter a string from which an integer is read and
+ * entered into memory, allowing it to be used as a seed for the rand() function.
+ *
+ * Using rand() calls, random numbers are stored into memory and into static
+ * variables so that the user's guesses can be compared against them within
+ * the local file.
+ *
+ * make_guess does so by first checking for perfect matches, and then checking
+ * to see if each guess is paired with a solution in another spot. This is done
+ * with variables meant to indicated whether a solution and/or a guess is already
+ * paired.
  */
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "prog5.h"
-
-
-/*
- * You will need to keep track of the solution code using file scope
- * variables as well as the guess number.
- */
 
 static int guess_number;
 static int solution1;
 static int solution2;
 static int solution3;
 static int solution4;
-
-
 /*
  * set_seed -- This function sets the seed value for pseudorandom
  * number generation based on the number the user types.
@@ -41,26 +44,18 @@ static int solution4;
  */
 int set_seed (const char seed_str[])
 {
-//    Example of how to use sscanf to read a single integer and check for anything other than the integer
-//    "int seed" will contain the number typed by the user (if any) and the string "post" will contain anything after the integer
-//    The user should enter only an integer, and nothing else, so we will check that only "seed" is read.
-//    We declare
     int seed;
     char post[2];
-//    The sscanf statement below reads the integer into seed.
-    sscanf (seed_str, "%d%1s", &seed, post);
-//    If there is no integer, seed will not be set. If something else is read after the integer, it will go into "post".
-//    The return value of sscanf indicates the number of items read succesfully.
-//    When the user has typed in only an integer, only 1 item should be read sucessfully.
-//    Check that the return value is 1 to ensure the user enters only an integer.
-    if (sscanf(seed_str, "%d%1s", &seed, post) != 1){
-      printf("set_seed: invalid seed\n");
-      return 0;
+
+    sscanf (seed_str, "%d%1s", &seed, post); // reads integer from string into seed,
+                                             // and anything else after whitespace into post
+
+    if (sscanf(seed_str, "%d%1s", &seed, post) != 1){ // check return value of sscanf
+      printf("set_seed: invalid seed\n");             // if the return value is not 1,
+      return 0;                                       // the string is invalid
 }
-//    Feel free to uncomment these statements, modify them, or delete these comments as necessary.
-//    You may need to change the return statement below
-    srand(seed);
-    return 1;
+    srand(seed); // if the above is all checked, set seed for rand() function
+    return 1;    // return 1 to indicated valid seed
 }
 
 
@@ -81,18 +76,21 @@ int set_seed (const char seed_str[])
  */
 void start_game (int* one, int* two, int* three, int* four)
 {
-// your code here
-	*one = rand() % 6;
+// call rand() function and assign pseudorandom number to the dereferenced pointer, in order
+// add one to shift 0 - 6 to 1 - 7
+	*one = rand() % 7;
   *one += 1;
-	*two = rand() % 6;
+	*two = rand() % 7;
   *two += 1;
-	*three = rand() % 6;
+	*three = rand() % 7;
   *three += 1;
-	*four = rand() % 6;
+	*four = rand() % 7;
   *four += 1;
 
+// initialize guess number to 1
   guess_number = 1;
 
+// store a copy of solution in static variables
   solution1 = *one;
   solution2 = *two;
   solution3 = *three;
@@ -125,28 +123,23 @@ void start_game (int* one, int* two, int* three, int* four)
 
 int make_guess (const char guess_str[], int* one, int* two, int* three, int* four){
   int w, x, y, z, p_match = 0, m_match = 0,
-    track_g1 = 0, track_g2 = 0, track_g3 = 0, track_g4 = 0,
-    track_s1 = 0, track_s2 = 0, track_s3 = 0, track_s4 = 0;
+    track_g1 = 0, track_g2 = 0, track_g3 = 0, track_g4 = 0, // checks if each guess is paired
+    track_s1 = 0, track_s2 = 0, track_s3 = 0, track_s4 = 0; // checks if solutions are paired
   char post[2];
 
-//  One thing you will need to read four integers from the string guess_str, using a process
-//  similar to set_seed
-//  The statement, given char post[2]; and four integers w,x,y,z,
+// checks if exactly four items are read, and reads integers from string into
+// guess variables
 	sscanf (guess_str, "%d%d%d%d%1s", &w, &x, &y, &z, post);
-//  will read four integers from guess_str into the integers and read anything else present into post
-//  The return value of sscanf indicates the number of items sucessfully read from the string.
-//  You should check that exactly four integers were sucessfully read.
 	if (sscanf (guess_str, "%d%d%d%d%1s", &w, &x, &y, &z, post) != 4){
     printf("make_guess: invalid guess\n");
     return 0;
 	}
-//  You should then check if the 4 integers are between 1-7. If so, it is a valid guess
+//  Check if integers are between 1-7
 	if ( 1 > w || w > 7 || 1 > x || x > 7 || 1 > y || y > 7 || 1 > z || z > 7){
     printf("make_guess: invalid guess\n");
 		return 0;
 	}
-//  Otherwise, it is invalid.
-//  Feel free to use this sscanf statement, delete these comments, and modify the return statement as needed
+
   *one = w;
   *two = x;
   *three = y;
@@ -178,23 +171,26 @@ int make_guess (const char guess_str[], int* one, int* two, int* three, int* fou
   }
 
 // Check for mismatched guesses and solutions
-  if (!track_g1){
-    if (!track_s2 && w == solution2){
-      m_match++;
-      track_g1 = 1;
+  if (!track_g1){                       // if guess 1 is unpaired
+    if (!track_s2 && w == solution2){   // check if solution 2 is unpaired
+      m_match++;                        // if guess 1 = solution 2,
+      track_g1 = 1;                     // pair the two
       track_s2 = 1;
     }
-    if (!track_g1 && !track_s3 && w == solution3){
-      m_match++;
+    if (!track_g1 && !track_s3 && w == solution3){  // do the same with solution 3
+      m_match++;                                    // if guess 1 is still not paired
       track_g1 = 1;
       track_s3 = 1;
     }
-    if (!track_g1 && !track_s4 && w == solution4){
-      m_match++;
+    if (!track_g1 && !track_s4 && w == solution4){ // if guess 1 is still not paired
+      m_match++;                                   // do the same as above with solution 4
       track_g1 = 1;
       track_s4 = 1;
     }
   }
+
+// the following three blocks of code do the same thing as above, but with guesses
+// 2, 3, and 4.
 
   if (!track_g2){
     if (!track_s1 && x == solution1){
@@ -249,7 +245,7 @@ int make_guess (const char guess_str[], int* one, int* two, int* three, int* fou
       track_s3 = 1;
     }
   }
-
+  // After all guesses are made, or if the user guesses correctly, print this line.
   printf("With guess %d, you got %d perfect matches and %d misplaced matches.\n", guess_number, p_match, m_match);
   guess_number++;
   return 1;
