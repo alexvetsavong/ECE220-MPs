@@ -8,6 +8,18 @@
  */
 void matrix_multiply(double *matrixA,double *matrixB,double *matrixC,int m,int k,int n)
 {
-//YOUR CODE HERE
+	int x,y,z;
+    	int a,b,c;
+
+	for (x=0;x<m;x++){
+		for(y=0;y<n;y++){
+			for(z=0;z<k;z++){
+				a = x * k + z;
+		       		b = y + n * z; 
+				c = x*n + y;
+				matrixC[c] += matrixA[a] * matrixB[b];	
+		}
+	}
+}
 }
 
