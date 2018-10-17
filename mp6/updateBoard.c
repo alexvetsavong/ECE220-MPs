@@ -138,6 +138,32 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 			}
 		}
 	}
+
+	if (board[(row*boardColSize+col)-boardColSize]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)-boardColSize-1]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)-boardColSize+1]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)-1]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)+1]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)+boardColSize-1]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)+boardColSize]){
+		alive_count++;
+	}
+	if (board[(row*boardColSize+col)+boardColSize+1]){
+		alive_count++;
+	}
+
 	return alive_count;
 }
 
