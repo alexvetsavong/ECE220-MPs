@@ -27,7 +27,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 		}
 	}
 
-	if (row == 0 && col == boardColSize){
+	if (row == 0 && col == boardColSize-1){
 		if (board[(row*boardColSize+col)-1]){
 			alive_count++;
 		}
@@ -39,7 +39,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 		}
 	}
 
-	if (row == boardRowSize && col == 0){
+	if (row == boardRowSize-1 && col == 0){
 		if (board[(row*boardColSize+col)+1]){
 			alive_count++;
 		}
@@ -51,7 +51,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 		}
 	}
 
-	if (row == boardRowSize && col == boardColSize){
+	if (row == boardRowSize-1 && col == boardColSize-1){
 		if (board[(row*boardColSize+col)-1]){
 			alive_count++;
 		}
@@ -63,7 +63,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 		}
 	}
 
-	if ((row == 0 || row == boardRowSize) && (col != 0 && col != boardColSize)){
+	if ((row == 0 || row == boardRowSize-1) && (col != 0 && col != boardColSize)){
 		if (row == 0){
 			if (board[(row*boardColSize+col)-1]){
 				alive_count++;
@@ -82,7 +82,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 			}
 		}
 
-		if (row == boardRowSize){
+		if (row == boardRowSize-1){
 			if (board[(row*boardColSize+col)-1]){
 				alive_count++;
 			}
@@ -120,7 +120,7 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 			}
 		}
 
-		if (col == boardColSize){
+		if (col == boardColSize-1){
 			if (board[(row*boardColSize+col)-boardColSize]){
 				alive_count++;
 			}
@@ -139,31 +139,32 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
 		}
 	}
 
-	if (board[(row*boardColSize+col)-boardColSize]){
-		alive_count++;
+	if (row != 0 && row != boardRowSize-1 && col != 0 && col !=boardColSize-1){
+		if (board[(row*boardColSize+col)-boardColSize]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)-boardColSize-1]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)-boardColSize+1]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)-1]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)+1]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)+boardColSize-1]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)+boardColSize]){
+			alive_count++;
+		}
+		if (board[(row*boardColSize+col)+boardColSize+1]){
+			alive_count++;
+		}
 	}
-	if (board[(row*boardColSize+col)-boardColSize-1]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)-boardColSize+1]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)-1]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)+1]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)+boardColSize-1]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)+boardColSize]){
-		alive_count++;
-	}
-	if (board[(row*boardColSize+col)+boardColSize+1]){
-		alive_count++;
-	}
-
 	return alive_count;
 }
 
@@ -177,30 +178,35 @@ int countLiveNeighbor(int* board, int boardRowSize, int boardColSize, int row, i
  * Output: board is updated with new values for next step.
  */
 void updateBoard(int* board, int boardRowSize, int boardColSize) {
-	int i, ret, newBoard[boardRowSize*boardColSize];
-	for (i = 0; i < boardRowSize * boardColSize; i++){
+	int row, col, ret, nextState[boardRowSize*boardColSize];
+	for (row = 0; row < boardRowSize; row++){
+		for (col = 0; col < boardColSize; col++){
+			ret = countLiveNeighbor(board, boardRowSize, boardColSize, row, col);
 
-		ret = countLiveNeighbor(board, boardRowSize, boardColSize, i/boardColSize, i%boardColSize);
+			if (ret < 2){
+				nextState[row*boardColSize+col] = 0;
+			}
 
-		if (ret < 2){
-			newBoard[i] = 0;
-		}
+			if (ret == 2){
+				if (!board[row*boardColSize+col]){
+					nextState[row*boardColSize+col] = 0;
+				}
+				else nextState[row*boardColSize+col] = 1;
+			}
 
-		if (!board[i] && ret == 2){
-			newBoard[i] = 0;
-		}
+			if (ret == 3){
+				nextState[row*boardColSize+col] = 1;
+			}
 
-		if ((board[i] != 0 && ret == 2) || ret == 3){
-			newBoard[i] = 1;
-		}
-
-
-		if (ret > 3){
-			newBoard[i] = 0;
+			if (ret > 3){
+				nextState[row*boardColSize+col] = 0;
+			}
 		}
 	}
-	for (i = 0; i < boardRowSize * boardColSize; i++){
-		board[i] = newBoard[i];
+	for (row = 0; row < boardRowSize; row++){
+		for (col = 0; col < boardColSize; col++){
+			board[row*boardColSize+col] = nextState[row*boardColSize+col];
+		}
 	}
 }
 
@@ -216,37 +222,45 @@ void updateBoard(int* board, int boardRowSize, int boardColSize) {
  * return 0 if the alive cells change for the next step.
  */
 int aliveStable(int* board, int boardRowSize, int boardColSize){
-	int i, ret, life_check = 1, live_count, nextState[boardRowSize*boardColSize];
-	for (i = 0; i < boardRowSize * boardColSize; i++){
+	int row, col, ret, stable_check, life_check = 0, alive_count, nextState[boardRowSize*boardColSize];
+	stable_check = 1;
+	for (row = 0; row < boardRowSize; row++){
+		for (col = 0; col < boardColSize; col++){
+			alive_count = countLiveNeighbor(board, boardRowSize, boardColSize, row, col);
 
-		live_count = countLiveNeighbor(board, boardRowSize, boardColSize, i/boardColSize, i%boardColSize);
+			if (alive_count < 2){
+				nextState[row*boardColSize+col] = 0;
+			}
 
-		if (live_count < 2){
-			nextState[i] = 0;
-		}
+			if (alive_count == 2){
+				if (!board[row*boardColSize+col]){
+					nextState[row*boardColSize+col] = 0;
+				}
+				else{
+					nextState[row*boardColSize+col] = 1;
+					life_check = 1; // there is life in the board
+				}
+			}
 
-		if (!board[i] && live_count == 2){
-			nextState[i] = 0;
-		}
+			if (alive_count == 3){
+				nextState[row*boardColSize+col] = 1;
+				life_check = 1; // there is life in the board
+			}
 
-		if ((board[i] != 0 && live_count == 2) || live_count == 3){
-			nextState[i] = 1;
-			life_check = 0; // flag indicating that there is at least one live cell in nextState
-		}
-
-
-		if (live_count > 3){
-			nextState[i] = 0;
+			if (alive_count > 3){
+				nextState[row*boardColSize+col] = 0;
+			}
 		}
 	}
 
-	for (i=0; i < boardColSize*boardRowSize; i++){
-		if (board[i] != nextState[i]){
-			ret = 0;
-			break;
+	for (row=0;row<boardRowSize;row++){
+		for (col=0;col<boardColSize;col++){
+			if (board[row*boardColSize+col] != nextState[row*boardColSize+col]){
+				stable_check = 0;
+				ret = 0;
+			}
 		}
-		ret = 1;
 	}
-if (!life_check) ret = 1;
+if (!life_check || stable_check) ret = 1;
 return ret;
 }
