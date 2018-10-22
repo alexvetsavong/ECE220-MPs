@@ -9,7 +9,7 @@
 
 
 unsigned int N;
-void backtracking( unsigned int index, int chosen[N], unsigned int permutation[N] ); 
+void backtracking( unsigned int index, int chosen[N], unsigned int permutation[N] );
 void verify_output( int* chosen , unsigned int* permutation );
 
 
@@ -58,28 +58,28 @@ void verify_output( int* chosen , unsigned int *permutation ){
 }
 
 
-/*  
+/*
  *  index  : position in permutation
- *  chosen : an array which indicates the corresponding number has been selected or not. 
+ *  chosen : an array which indicates the corresponding number has been selected or not.
  *			 If chosen[i] = 0, (i+1) is not selected
  *			 If chosen[i] = 1, (i+1) has been selected
- *	permutation : a 1-D array holds partial permutation  
+ *	permutation : a 1-D array holds partial permutation
 */
-void backtracking( unsigned int index, int chosen[N], unsigned int permutation[N]  )    
+void backtracking( unsigned int index, int chosen[N], unsigned int permutation[N]  )
 {
-
-	if ( index == N ){        
+	if ( index == N ){
 		/* If a permutation is enumerated, use print_permutation to print it. Don't modify this */
 		print_permutation( permutation );
 	}
 	else{
 		// Your code goes here
+		for(index=0;index<N;index++){
+			if(!chosen[index]){
+				permutation[index]=index+1;
+				chosen[index]=1;
+				backtracking(index+1, chosen, permutation);
+				chosen[index]=0;
+			}
+		}
 	}
-	
 }
-
-
-
-
-
-
