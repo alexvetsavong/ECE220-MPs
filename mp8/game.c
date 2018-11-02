@@ -1,14 +1,18 @@
 /* Name: Alex Vetsavong
-* NetID: avetsa2
-* Date: 11/01/2018
-* Assignment: MP8 - 2048 Game
-*
-* This program is the implementation of the 2048 game which uses multiple functions to
-* determine the behavior of sliding tiles when a key is pressed to determine the direction
-* of the slide. This is determined by checking for multiple conditions during the shifting
-* of each element in the column and row, and as cells are meged, their combined value is added
-* to the total game score.
-*/
+ * NetID: avetsa2
+ * Date: 11/01/2018
+ * Assignment: MP8 - 2048 Game
+ *
+ * This program is the implementation of the 2048 game which uses multiple functions to
+ * determine the behavior of sliding tiles when a key is pressed to determine the direction
+ * of the slide. This is determined by checking for multiple conditions during the shifting
+ * of each element in the column and row, and as cells are meged, their combined value is added
+ * to the total game score. This is done by utilizing structs and their characteristics in order to
+ * pass multiple values and parameters between different functions. At the end, a temporary copy
+ * of the game board is created in order to check whether or not the game has reached an happened
+ * when no further moves can be made.
+ *
+ */
 
 #include "game.h"
 
