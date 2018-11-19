@@ -29,12 +29,11 @@ void insert_node( int d1, NODE* p1 ){
 		p1->right = init_node( d1, NULL, NULL );
 	else if( p1->d > d1 && p1->left == NULL )
 		p1->left = init_node( d1, NULL, NULL );
-	else if( p1->d < d1 && p1->right != NULL ) 
+	else if( p1->d < d1 && p1->right != NULL )
 		insert_node( d1, p1->right );
 	else
 		insert_node( d1, p1->left );
 }
-
 
 /* create a binary search tree from an array */
 NODE* create_tree(int a[], int size )
@@ -53,8 +52,17 @@ NODE* lowest_common_ancestor (NODE* root , int first_number , int second_number 
 {
 	/* your code goes here */
 
+	if(root->d <= first_number && root->d >= second_number){
+		return root;
+	}
+
+	if(root->left != NULL && root->d > first_number && root->d > second_number){
+		return lowest_common_ancestor(root->left, first_number, second_number);
+	}
+
+	if(root->right != NULL && root->d < first_number && root->d < second_number){
+		return lowest_common_ancestor(root->right, first_number, second_number);
+	}
+
+	return root;
 }
-
-
-
-
