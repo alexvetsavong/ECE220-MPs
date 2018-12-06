@@ -143,9 +143,9 @@ RectPrism RectPrism::operator + (const RectPrism& rhs){
 RectPrism RectPrism::operator - (const RectPrism& rhs){
     //TODO
     RectPrism temp(0,0,0);
-    temp.spec[0] = max(0.0, spec[0] + rhs.spec[0]);
-    temp.spec[1] = max(0.0, spec[1] + rhs.spec[1]);
-    temp.spec[2] = max(0.0, spec[2] + rhs.spec[2]);
+    temp.spec[0] = max(0.0, spec[0] - rhs.spec[0]);
+    temp.spec[1] = max(0.0, spec[1] - rhs.spec[1]);
+    temp.spec[2] = max(0.0, spec[2] - rhs.spec[2]);
     return temp;
 }
 
@@ -188,7 +188,7 @@ vector<Shape*> CreateShapes(char* file_name){
     vector<Shape*> shape_ptrs(num_shapes, NULL);
     //TODO
 
-    int length = 0, width = 0, height = 0;
+    double length = 0.0, width = 0.0, height = 0.0;
     string name;
     Shape* temp = NULL;
 
