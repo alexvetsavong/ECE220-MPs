@@ -97,9 +97,14 @@ void Rectangle::setLength(double length){
 //@@Insert your code here
 void RectPrism::copy(const RectPrism& other){
     //TODO
+    spec = new double[3];
+    spec[0] = other.spec[0];
+    spec[1] = other.spec[1];
+    spec[2] = other.spec[2];
 }
 void RectPrism::clear(){
     //TODO
+    delete(spec);
 }
 RectPrism::RectPrism(double width, double length, double height):Shape("RectPrism"){
     spec = new double[3];
@@ -120,20 +125,28 @@ const RectPrism& RectPrism::operator = (const RectPrism& other){
 }
 double RectPrism::getVolume()const{
     //TODO
-    return 0;
+    return spec[0]*spec[1]*spec[2];
 }
 double RectPrism::getArea()const{
     //TODO
-    return 0;
+    return (2*(spec[0]*spec[1] + spec[0]*spec[2] + spec[1]*spec[2]));
 }
 RectPrism RectPrism::operator + (const RectPrism& rhs){
     //TODO
-    return RectPrism(0,0,0);
+    RectPrism temp(0,0,0);
+    temp.spec[0] = spec[0] + rhs.spec[0];
+    temp.spec[1] = spec[1] + rhs.spec[1];
+    temp.spec[2] = spec[2] + rhs.spec[2];
+    return temp;
 }
 
 RectPrism RectPrism::operator - (const RectPrism& rhs){
     //TODO
-    return RectPrism(0,0,0);
+    RectPrism temp(0,0,0);
+    temp.spec[0] = max(0.0, spec[0] + rhs.spec[0]);
+    temp.spec[1] = max(0.0, spec[1] + rhs.spec[1]);
+    temp.spec[2] = max(0.0, spec[2] + rhs.spec[2]);
+    return temp;
 }
 
 // double * spec;
@@ -175,6 +188,23 @@ vector<Shape*> CreateShapes(char* file_name){
     vector<Shape*> shape_ptrs(num_shapes, NULL);
     //TODO
 
+    int length = 0, width = 0, height = 0;
+    string name;
+    Shape* temp = NULL;
+
+    for(int i = 0; i<num_shapes;i++){
+      ifs >> name;
+      if (name == "Rectangle"){
+        ifs >> width >> length;
+        temp = new Rectangle(width,length);
+        shape_ptrs.at(i) = temp;
+      }
+      if (name == "RectPrism"){
+        ifs >> width >> length >> height;
+        temp = new RectPrism(width,length,height);
+        shape_ptrs.at(i) = temp;
+      }
+    }
 
     ifs.close();
     return shape_ptrs;
@@ -185,7 +215,11 @@ vector<Shape*> CreateShapes(char* file_name){
 double MaxArea(vector<Shape*> shapes){
     double max_area = 0;
     //@@Insert your code here
-
+    // for(int i = 0; i < shapes.size();i++){
+    //   if(max_area < shapes[i]->getArea()){
+    //     max_area = shapes[i]->getArea();
+    //   }
+    // }
     return max_area;
 }
 
@@ -195,6 +229,10 @@ double MaxArea(vector<Shape*> shapes){
 double MaxVolume(vector<Shape*> shapes){
     double max_volume = 0;
     //@@Insert your code here
-
+    // for(int i = 0; i < shapes.size();i++){
+    //   if(max_volume < shapes[i]->getVolume()){
+    //     max_volume = shapes[i]->getVolume();
+    //   }
+    // }
     return max_volume;
 }
