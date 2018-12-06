@@ -8,10 +8,12 @@
 
 Shape::Shape(string name){
     //TODO
+    name_ = name;
 }
+
 string Shape::getName(){
     //TODO
-    return "name";
+    return name_;
 }
 
 
@@ -22,9 +24,13 @@ string Shape::getName(){
 
 void Rectangle::copy(const Rectangle& other){
     //TODO
+    spec = new double[2];
+    spec[0] = other.spec[0];
+    spec[1] = other.spec[1];
 }
 void Rectangle::clear(){
     //TODO
+    delete(spec);
 }
 Rectangle::Rectangle(double width, double length):Shape("Rectangle"){
     spec = new double[2];
@@ -44,21 +50,27 @@ const Rectangle& Rectangle::operator = (const Rectangle& other){
 }
 double Rectangle::getArea()const{
     //TODO
-    return 0;
+    return spec[0]*spec[1];
 }
 double Rectangle::getVolume()const{
     //TODO
-    return 1;
+    return 0;
 }
 Rectangle Rectangle::operator + (const Rectangle& rhs){
     //TODO
-    return Rectangle(0,0);
+    Rectangle temp(0,0);
+    temp.spec[0] = spec[0] + rhs.spec[0];
+    temp.spec[1] = spec[1] + rhs.spec[1];
+    return temp;
 }
 
 Rectangle Rectangle::operator - (const Rectangle& rhs){
     //TODO
-    return Rectangle(0,0);
-} 
+    Rectangle temp(0.0,0.0);
+    temp.spec[0] = max(0.0,spec[0] - rhs.spec[0]);
+    temp.spec[1] = max(0.0,spec[1] - rhs.spec[1]);
+    return temp;
+}
 
 // double * spec;
 //spec[0] should be width
@@ -113,7 +125,7 @@ double RectPrism::getVolume()const{
 double RectPrism::getArea()const{
     //TODO
     return 0;
-}  
+}
 RectPrism RectPrism::operator + (const RectPrism& rhs){
     //TODO
     return RectPrism(0,0,0);
@@ -126,7 +138,7 @@ RectPrism RectPrism::operator - (const RectPrism& rhs){
 
 // double * spec;
 //spec[0] should be length
-//spec[1] should be width 
+//spec[1] should be width
 //spec[2] should be height
 double RectPrism::getWidth()const{return spec? spec[1]:0;}
 double RectPrism::getHeight()const{return spec? spec[2]:0;}
@@ -151,9 +163,9 @@ void RectPrism::setLength(double length){
 }
 
 
- 
+
 // Read shapes from test.txt and initialize the objects
-// Return a vector of pointers that points to the objects 
+// Return a vector of pointers that points to the objects
 vector<Shape*> CreateShapes(char* file_name){
     //@@Insert your code here
 
@@ -161,24 +173,24 @@ vector<Shape*> CreateShapes(char* file_name){
     double num_shapes = 0;
     ifs >> num_shapes;
     vector<Shape*> shape_ptrs(num_shapes, NULL);
-    //TODO    
-    
+    //TODO
+
 
     ifs.close();
     return shape_ptrs;
 }
 
-// call getArea() of each object 
+// call getArea() of each object
 // return the max area
 double MaxArea(vector<Shape*> shapes){
     double max_area = 0;
     //@@Insert your code here
-    
+
     return max_area;
 }
 
 
-// call getVolume() of each object 
+// call getVolume() of each object
 // return the max volume
 double MaxVolume(vector<Shape*> shapes){
     double max_volume = 0;
@@ -186,4 +198,3 @@ double MaxVolume(vector<Shape*> shapes){
 
     return max_volume;
 }
-
