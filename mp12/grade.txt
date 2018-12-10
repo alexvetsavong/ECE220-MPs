@@ -1,0 +1,18 @@
+Compilation Results:
+********************
+ 
+
+ ------------------- Begin Verifying MP12 ---------------------
+getName() 6/6
+Rectangle: 32/32
+RectPrism: 32/32
+MaxArea(): 10/10
+MaxVolume(): 10/10
+CreateShape() 10/10
+Your total Socre for MP12: 100/100
+-------------------- End Verifying MP12 ----------------------
+
+
+
+Late Penalty: 0
+Total: 100
